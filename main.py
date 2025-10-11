@@ -23,7 +23,7 @@ os.makedirs(TOP_TRACKS_DIR, exist_ok=True)
 os.makedirs(ARTISTS_DIR, exist_ok=True)
 
 def load_json(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, "r", encoding="utf-8") as file:
         return json.load(file)
 
 def find_artist_by_name(name):
@@ -31,9 +31,9 @@ def find_artist_by_name(name):
     result = (None, None)
 
     for file in files:
-        if file.endswith('.json'):
+        if file.endswith(".json"):
             artist_data = load_json(os.path.join(ARTISTS_DIR, file))
-            if artist_data.get('name', '').lower() == name.lower():
+            if artist_data.get("name", "").lower() == name.lower():
                 result = (file, artist_data)
     
     return result
@@ -141,52 +141,52 @@ def export_artist_data():
 
     artist_file, artist_data = find_artist_by_name(artist_name_input)
     if artist_file:
-        artist_name = artist_data.get('name', artist_name_input)
-        artist_id = artist_data.get('id')
+        artist_name = artist_data.get("name", artist_name_input)
+        artist_id = artist_data.get("id")
 
         album_file = os.path.join(ALBUMS_DIR, f"{artist_id}.json")
         num_albums = 0
         if os.path.exists(album_file):
             album_data = load_json(album_file)
-            num_albums = len(album_data.get('items', []))
+            num_albums = len(album_data.get("items", []))
 
         top_file = os.path.join(TOP_TRACKS_DIR, f"{artist_id}.json")
         top1 = top2 = ""
         if os.path.exists(top_file):
             top_data = load_json(top_file)
-            tracks = top_data.get('tracks', [])
+            tracks = top_data.get("tracks", [])
             if len(tracks) > 0:
-                top1 = tracks[0].get('name', '')
+                top1 = tracks[0].get("name", "")
             if len(tracks) > 1:
-                top2 = tracks[1].get('name', '')
+                top2 = tracks[1].get("name", "")
 
-        genres = artist_data.get('genres', [])
-        genres_str = ', '.join(genres) if genres else ''
+        genres = artist_data.get("genres", [])
+        genres_str = ", ".join(genres) if genres else ""
 
         rows = read_artists_data_csv()
         found = False
         for row in rows:
-            if row.get('artist_id', '').strip() == artist_id.strip():
-                row['artist_name'] = artist_name
-                row['number_of_albums'] = str(num_albums)
-                row['top_track_1'] = top1
-                row['top_track_2'] = top2
-                row['genres'] = genres_str
+            if row.get("artist_id", "").strip() == artist_id.strip():
+                row["artist_name"] = artist_name
+                row["number_of_albums"] = str(num_albums)
+                row["top_track_1"] = top1
+                row["top_track_2"] = top2
+                row["genres"] = genres_str
                 found = True
 
         if not found:
             rows.append({
-                'artist_id': artist_id,
-                'artist_name': artist_name,
-                'number_of_albums': str(num_albums),
-                'top_track_1': top1,
-                'top_track_2': top2,
-                'genres': genres_str
+                "artist_id": artist_id,
+                "artist_name": artist_name,
+                "number_of_albums": str(num_albums),
+                "top_track_1": top1,
+                "top_track_2": top2,
+                "genres": genres_str
             })
 
         write_artists_data_csv(rows)
 
-        print(f'Exporting "{artist_name}" data to CSV file...')
+        print(f"Exporting \"{artist_name}\" data to CSV file...")
         if found:
             print("Data successfully updated.")
         else:
