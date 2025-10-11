@@ -9,7 +9,7 @@ Course: DIT009 – Fundamentals of Programming
 =====================================================
 Task Division
 -------------
-- Task 0: Ifty implemented the Project Setup.
+- Task 0: Ifty implemented the Project Setup / Helper Utilities.
 - Task 0.1: Ifty implemented the Main menu.
 - Task 1: Ifty  implemented the Get All Artists.
 - Task 2: Salah implemented the Get All Albums By An Artist.
