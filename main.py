@@ -22,6 +22,7 @@ def load_json(file_path):
     with open(file_path, "r", encoding="utf-8") as file:
         return json.load(file)
 
+# For task 2 and 4
 def find_artist_by_name(name):
     files = sorted(os.listdir(ARTISTS_DIR))
     result = (None, None)
@@ -33,6 +34,81 @@ def find_artist_by_name(name):
                 result = (file, artist_data)
     
     return result
+
+# For task 6 and 7
+def get_available_songs():
+    songs = []
+
+    for file in sorted(os.listdir(SONGS_DIR)):
+        path = os.path.join(SONGS_DIR, file)
+        title = None
+        artist = None
+
+        if file.endswith(".txt"):
+            name = os.path.splitext(file)[0]
+            title = name
+            songs.append({
+                "title": title,
+                "artist": artist,
+                "path": path,
+                "type": "txt"
+            })
+        elif file.endswith(".json"):
+            song_data = load_json(path)
+            title = song_data.get("name", "") or song_data.get("title", "") or os.path.splitext(file)[0]
+            artist = song_data.get("artist")
+            songs.append({
+                "title": title,
+                "artist": artist,
+                "path": path,
+                "type": "json"
+            })
+    
+    if not songs:
+        for file in sorted(os.listdir(SONGS_DIR)):
+            if file.endswith(".json"):
+                song_data = load_json(os.path.join(SONGS_DIR, file))
+                title = song_data.get("name", "")
+                artist = song_data.get("artist")
+                lyrics = song_data.get("lyrics", "")
+                songs.append({
+                    "title": title,
+                    "artist": artist,
+                    "path": os.path.join(SONGS_DIR, file),
+                    "type": "songjson",
+                    "lyrics": lyrics
+                })
+    
+    seen_titles = set()
+    unique_songs = []
+
+    for song in songs:
+        title = song.get("title") or "Unknown"
+
+        if title not in seen_titles:
+            seen_titles.add(title)
+            unique_songs.append(song)
+    
+    return unique_songs
+
+# For task 6 and 7
+def search_songs_by_keyword(entry):
+    category = entry.get("type")
+    path = entry.get("path")
+
+    if category == "txt":
+        with open(path, "r", encoding="utf-8") as file:
+            return file.read()
+    elif category == "json":
+        song_data = load_json(path)
+        return song_data.get("lyrics", "")
+    elif category == "songjson":
+        if entry.get("lyrics"):
+            return entry.get("lyrics")
+        song_data = load_json(path)
+        return song_data.get("lyrics", "")
+    else:
+        return ""
 
 # !------- Task 0.1: Main Menu by Ifty Zubaer -------!
 def print_menu():
@@ -73,7 +149,7 @@ def main():
                 case 6:
                     moosify_lyrics()
                 case 7:
-                    detect_longest_unique_sequence()
+                    calculate_longest_unique_sequence()
                 case 8:
                     predict_weather_for_concerts()
                 case 9:
@@ -197,8 +273,53 @@ def moosify_lyrics():
     pass
 
 # !------- Task 7: Calculate Longest Unique Word Sequence In A Song by Ifty -------!
-def detect_longest_unique_sequence():
-    pass
+def propocess_text_for_analysis(text):
+    text = text.lower()
+    text = re.sub(r"[^\w\s']", " ", text)
+    text = re.sub(r"\s+", " ", text)
+    words = text.strip().split()
+
+    return words
+
+def calculate_longest_unique_sequence():
+    songs = get_available_songs()
+
+    if songs:
+        print("Available songs:")
+
+        for index, song in enumerate(songs):
+            artist = song.get("artist") or "Unknown"
+            print(f"{index + 1}. {song.get('title')} by {artist}")
+        
+        choice = input("Please select one of the following songs (number): ").strip()
+        
+        if choice.isdigit():
+            choice = int(choice)
+
+            if choice < 1 or choice > len(songs):
+                print("Invalid choice.")
+                return
+            
+            entry = songs[choice - 1]
+            lyrics = search_songs_by_keyword(entry)
+
+            if lyrics:
+                words = propocess_text_for_analysis(lyrics)
+                seen = {}
+                start = 0
+                max_len = 0
+
+                for end in range(len(words)):
+                    word = words[end]
+                    if word in seen:
+                        start = max(start, seen[word] + 1)
+                    
+                    seen[word] = end
+                    max_len = max(max_len, end - start + 1)
+                
+                print(f"The length of the longest unique sequence in {entry.get('title')} is {max_len}")
+        else:
+            print("Invalid input.")
 
 # !------- Task 8: Weather Forecast For Upcoming Concerts by Salah -------!
 def predict_weather_for_concerts():
