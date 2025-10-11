@@ -25,7 +25,7 @@ def load_json(file_path):
 # !------- Task 0.1: Main Menu by Ifty Zubaer -------!
 def print_menu():
     print("\nWelcome to Mooziq!")
-    print("Choose one of the options below:\n")
+    print("Choose one of the options bellow:\n")
     print("1. Get All Artists")
     print("2. Get All Albums By An Artist")
     print("3. Get Top Tracks By An Artist")
@@ -73,12 +73,12 @@ def main():
 # !------- Task 1: Get All Artists by Ifty -------!
 def read_all_artists():
     files = os.listdir(ARTISTS_DIR)
+    files.sort()
     artists = []
     for file in files:
         if file.endswith(".json"):
             artists_data = load_json(os.path.join(ARTISTS_DIR, file))
             artists.append(artists_data.get("name", "Unknown Artist"))
-    
     return artists
 
 def get_all_artists():
@@ -86,6 +86,7 @@ def get_all_artists():
     print("Artists found in the database:")
     for name in artists:
         print(f"- {name}")
+
 
 # !------- Task 2: Get All Albums By An Artist by Salah -------!
 def get_albums_by_artist():
