@@ -17,10 +17,6 @@ ALBUMS_DIR = os.path.join(DATASET, "albums")
 TOP_TRACKS_DIR = os.path.join(DATASET, "top_tracks")
 LYRICS_DIR = os.path.join(DATASET, "lyrics")
 SONGS_DIR = os.path.join(DATASET, "songs")
-os.makedirs(DATASET, exist_ok=True)
-os.makedirs(ALBUMS_DIR, exist_ok=True)
-os.makedirs(TOP_TRACKS_DIR, exist_ok=True)
-os.makedirs(ARTISTS_DIR, exist_ok=True)
 
 def load_json(file_path):
     with open(file_path, "r", encoding="utf-8") as file:
