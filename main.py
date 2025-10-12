@@ -355,8 +355,7 @@ def get_released_albums_by_year():
 def moosify_lyrics():
     pass
 
-import re
-
+# !------- Task 7: Calculate Longest Unique Word Sequence In A Song by Ifty -------!
 def process_text_for_analysis(text):
     text = re.sub(r'\s+', ' ', text)
     text = text.lower()
@@ -368,7 +367,6 @@ def process_text_for_analysis(text):
         if word:
             processed_words.append(word)
     return processed_words
-
 
 def calculate_longest_unique_sequence():
     songs = get_available_songs()
@@ -404,7 +402,6 @@ def calculate_longest_unique_sequence():
                         max_len = max(max_len, end - start + 1)
 
                     print(f"The length of the longest unique sequence in {entry.get('title')} is {max_len}")
-
 
 # !------- Task 8: Weather Forecast For Upcoming Concerts by Salah -------!
 def predict_weather_for_concerts():
