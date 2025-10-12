@@ -355,54 +355,56 @@ def get_released_albums_by_year():
 def moosify_lyrics():
     pass
 
-# !------- Task 7: Calculate Longest Unique Word Sequence In A Song by Ifty -------!
-def propocess_text_for_analysis(text):
-    text = text.lower()
-    text = re.sub(r"[^\w\s']", " ", text)
-    text = re.sub(r"\s+", " ", text)
-    words = text.strip().split()
+import re
 
-    return words
+def process_text_for_analysis(text):
+    text = re.sub(r'\s+', ' ', text)
+    text = text.lower()
+    text = re.sub(r"[^a-z0-9\s]", "", text)
+    text = re.sub(r"\s+", " ", text).strip()
+    words = text.split(" ")
+    processed_words = []
+    for word in words:
+        if word:
+            processed_words.append(word)
+    return processed_words
+
 
 def calculate_longest_unique_sequence():
     songs = get_available_songs()
 
     if songs:
         print("Available songs:")
-
         for index, song in enumerate(songs):
             artist = song.get("artist") or "Unknown"
             print(f"{index + 1}. {song.get('title')} by {artist}")
-        
+
         choice = input("Please select one of the following songs (number): ").strip()
-        
         if choice.isdigit():
             choice = int(choice)
-
             if choice < 1 or choice > len(songs):
                 print("Invalid choice.")
                 return
-            
+
             entry = songs[choice - 1]
             lyrics = search_songs_by_keyword(entry)
 
             if lyrics:
-                words = propocess_text_for_analysis(lyrics)
-                seen = {}
-                start = 0
-                max_len = 0
+                words = process_text_for_analysis(lyrics)
 
-                for end in range(len(words)):
-                    word = words[end]
-                    if word in seen:
-                        start = max(start, seen[word] + 1)
-                    
-                    seen[word] = end
-                    max_len = max(max_len, end - start + 1)
-                
-                print(f"The length of the longest unique sequence in {entry.get('title')} is {max_len}")
-        else:
-            print("Invalid input.")
+                if words:
+                    seen = {}
+                    start = 0
+                    max_len = 0
+
+                    for end, word in enumerate(words):
+                        if word in seen and seen[word] >= start:
+                            start = seen[word] + 1
+                        seen[word] = end
+                        max_len = max(max_len, end - start + 1)
+
+                    print(f"The length of the longest unique sequence in {entry.get('title')} is {max_len}")
+
 
 # !------- Task 8: Weather Forecast For Upcoming Concerts by Salah -------!
 def predict_weather_for_concerts():
