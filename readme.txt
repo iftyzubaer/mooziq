@@ -12,8 +12,8 @@ Task Division
 - Task 0: Ifty implemented the Project Setup / Helper Utilities.
 - Task 0.1: Ifty implemented the Main menu.
 - Task 1: Ifty  implemented the Get All Artists.
-- Task 2: Salah implemented the Get All Albums By An Artist.
-- Task 3: Ali implemented the Get Top Tracks By An Artist. 
+- Task 2: Ifty implemented the Get All Albums By An Artist.
+- Task 3: Ifty implemented the Get Top Tracks By An Artist. 
 - Task 4: Ifty implemented the Export Artist Data.  
 - Task 5: Salah implemented the Get Released Albums By Year.
 - Task 6: Ali implemented the Song Creativity Score (Moosify Lyrics).

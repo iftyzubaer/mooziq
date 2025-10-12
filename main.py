@@ -22,19 +22,6 @@ def load_json(file_path):
     with open(file_path, "r", encoding="utf-8") as file:
         return json.load(file)
 
-# For task 2 and 4
-def find_artist_by_name(name):
-    files = sorted(os.listdir(ARTISTS_DIR))
-    result = (None, None)
-
-    for file in files:
-        if file.endswith(".json"):
-            artist_data = load_json(os.path.join(ARTISTS_DIR, file))
-            if artist_data.get("name", "").lower() == name.lower():
-                result = (file, artist_data)
-    
-    return result
-
 # For task 6 and 7
 def get_available_songs():
     songs = []
@@ -178,13 +165,109 @@ def get_all_artists():
     for name in artists:
         print(f"- {name}")
 
-# !------- Task 2: Get All Albums By An Artist by Salah -------!
-def get_albums_by_artist():
-    pass
+# !------- Task 2: Get All Albums By An Artist by Ifty -------!
+def find_artist_by_name(name):
+    files = sorted(os.listdir(ARTISTS_DIR))
+    result = (None, None)
 
-# !------- Task 3: Get Top Tracks By An Artist by Ali -------!
+    for file in files:
+        if file.endswith(".json"):
+            artist_data = load_json(os.path.join(ARTISTS_DIR, file))
+            if artist_data.get("name", "").lower() == name.lower():
+                result = (file, artist_data)
+    
+    return result
+
+def ordinal(num):
+    num = int(num)
+
+    if 10 <= (num % 100) <= 20:
+        suffix = 'th'
+    else:
+        suffix = {1: 'st', 2: 'nd', 3: 'rd'}.get(num % 10, 'th')
+
+    return f"{num}{suffix}"
+
+def formated_date(date_str, precision):
+    parts = date_str.split('-')
+    year = parts[0]
+
+    if precision == 'year':
+        return f"{year}"
+    
+    if len(parts) > 1:
+        month = int(parts[1])
+    else:
+        month = 1
+    
+    month_name = datetime(1900, month, 1).strftime('%B')
+
+    if precision == 'month':
+        return f"{month_name} {year}"
+    
+    if len(parts) > 2:
+        day = int(parts[2])
+    else:
+        day = 1
+    
+    return f"{month_name} {ordinal(day)} {year}"
+
+def get_albums_by_artist():
+    artist_name = input("Please input the name of an artist: ").strip()
+    artist_file, artist_data = find_artist_by_name(artist_name)
+    
+    if artist_file:
+        artist_id = artist_data.get("id")
+        proper_artist_name = artist_data.get("name", artist_name)
+        album_file_path = os.path.join(ALBUMS_DIR, f"{artist_id}.json")
+        
+        if os.path.exists(album_file_path):
+            albums_data = load_json(album_file_path)
+            items = albums_data.get("items", [])
+            print(f"Listing all available albums from {proper_artist_name}...")
+
+            for album in items:
+                name = album.get("name", "")
+                release_date = album.get("release_date", "")
+                release_date_precision = album.get("release_date_precision", 'day')
+                readable_date = formated_date(release_date, release_date_precision)
+
+                print(f"- \"{name}\" was released in {readable_date}.")
+
+# !------- Task 3: Get Top Tracks By An Artist by Ifty -------!
 def get_top_tracks_by_artist():
-    pass
+    artist_name = input("Please input the name of an artist: ").strip()
+    artist_file, artist_data = find_artist_by_name(artist_name)
+    
+    if not artist_file:
+        print(f"Artist '{artist_name}' not found.")
+        return
+    
+    artist_id = artist_data.get('id')
+    top_file = os.path.join(TOP_TRACKS_DIR, f"{artist_id}.json")
+    
+    if not os.path.exists(top_file):
+        print(f"No top tracks found for artist '{artist_name}'.")
+        return
+    
+    top_data = load_json(top_file)
+    tracks = top_data.get('tracks', [])
+    print(f"Listing top tracks for {artist_name}...")
+
+    for track in tracks:
+        name = track.get('name', '')
+        popularity = track.get('popularity', 0)
+
+        if popularity <= 30:
+            message = "No one knows this song."
+        elif popularity <= 50:
+            message = "Popular song."
+        elif popularity <= 70:
+            message = "It is quite popular now!"
+        else:
+            message = "It is made for the charts!"
+
+        print(f"- \"{name}\" has a popularity score of {popularity}. {message}")
 
 # !------- Task 4: Export Artist Data by Ifty -------!
 def read_artists_data_csv():
