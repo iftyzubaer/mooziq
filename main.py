@@ -408,8 +408,63 @@ def predict_weather_for_concerts():
     pass
 
 # !------- Task 9: Search Song By Lyrics by Ali -------!
+def build_inverted_index():
+    inverted_index = {}
+    
+    for file in os.listdir(SONGS_DIR):
+        if file.endswith(".json"):
+            song_path = os.path.join(SONGS_DIR, file)
+            song_data = load_json(song_path)
+            
+            title = song_data.get("name", "") or song_data.get("title", "")
+            lyrics = song_data.get("lyrics", "")
+            
+            if lyrics and title:
+                words = process_text_for_analysis(lyrics)
+                
+                for word in words:
+                    if word not in inverted_index:
+                        inverted_index[word] = []
+                    if title not in inverted_index[word]:
+                        inverted_index[word].append(title)
+    
+    return inverted_index
+
+def load_or_create_inverted_index():
+    if os.path.exists(INVERTED_INDEX_FILE):
+        inverted_index = load_json(INVERTED_INDEX_FILE)
+    else:
+        inverted_index = build_inverted_index()
+        
+        with open(INVERTED_INDEX_FILE, "w", encoding="utf-8") as file:
+            json.dump(inverted_index, file, indent=2)
+    
+    return inverted_index
+
 def search_by_lyrics():
-    pass
+    query = input("Please type the lyrics you'd like to search for: ").strip()
+    
+    if query:
+        query_words = process_text_for_analysis(query)
+        
+        if query_words:
+            inverted_index = load_or_create_inverted_index()
+            
+            song_scores = {}
+            
+            for word in query_words:
+                if word in inverted_index:
+                    for song in inverted_index[word]:
+                        if song not in song_scores:
+                            song_scores[song] = 0
+                        song_scores[song] += 1
+            
+            if song_scores:
+                sorted_songs = sorted(song_scores.items(), key=lambda x: x[1], reverse=True)
+                
+                print(f"Listing matches for '{query}'...")
+                for song, score in sorted_songs:
+                    print(f"- {song} with a score of {score}")
 
 if __name__ == "__main__":
     main()

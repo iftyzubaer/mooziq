@@ -19,7 +19,7 @@ Task Division
 - Task 6: **Ali** implemented the Song Creativity Score (Moosify Lyrics).
 - Task 7: **Ifty** implemented the Calculate Longest Unique Word Sequence in a Song.
 - Task 8: **Salah** implemented the Weather Forecast For Upcoming Concerts.
-- Task 9: **Ali** implemented the Search Song By Lyrics (Inverted Index).
+- Task 9: **Ifty** implemented the Search Song By Lyrics (Inverted Index).
 - Each member implemented the error handling for their own tasks.  
 - Code Review / Project Review: **Ifty** also acted as the reviewer for the project. This also included helping group members debug and improve their tasks when needed, to ensure that the entire project was consistent and working correctly.
 
