@@ -357,6 +357,7 @@ def get_released_albums_by_year():
 
     albums_found = []
 
+
     for filename in os.listdir(ALBUMS_DIR):
         if filename.endswith(".json"):
             album_path = os.path.join(ALBUMS_DIR, filename)
@@ -367,7 +368,12 @@ def get_released_albums_by_year():
                 if release_date.startswith(year):
                     album_name = album.get("name", "Unknown Album")
                     artists = album.get("artists", [])
-                    artist_name = ", ".join(artist.get("name", "Unknown Artist") for artist in artists)
+
+                    artist_name = ", ".join(
+                        artist.get("name", "Unknown Artist").strip()
+                        for artist in artists
+                    )
+
                     albums_found.append((album_name, artist_name))
 
     if not albums_found:
@@ -513,17 +519,28 @@ def format_date(date_string):
     return f"{month} {day}{suffix} {year}"
 
 def forecast_message(weather):
+    messages = []
+
     try:
         precipitation = float(weather.get("precipitation", "0"))
+        temp_min = float(weather.get("temperature_min", "0"))
+        wind_speed = float(weather.get("wind_speed", "0"))
     except ValueError:
         return "No data."
 
-    if precipitation == 0:
-        return "Perfect weather!"
-    elif precipitation <= 2:
-        return "Wear warm clothes."
-    else:
-        return "Wear warm clothes. Bring an umbrella."
+    if temp_min <= 10:
+        messages.append("Wear warm clothes.")
+
+    if precipitation >= 2.3:
+        if wind_speed < 15:
+            messages.append("Bring an umbrella.")
+        else:
+            messages.append("Bring a raincoat.")
+
+    if temp_min > 10 and precipitation < 2.3:
+        messages.append("Perfect weather!")
+
+    return " ".join(messages)
 
 def predict_weather_for_concerts():
     concerts, artist_list = read_concert_data()
@@ -549,7 +566,8 @@ def predict_weather_for_concerts():
 
     formatted_artist = next((a for a in artist_list if a.lower() == artist_input.lower()), artist_input)
 
-    print(f"{formatted_artist} has {len(matching_concerts)} upcoming concert(s):")
+    print(f'Fetching weather forecast for "{formatted_artist}" concerts...')
+    print(f"{formatted_artist.upper()} has {len(matching_concerts)} upcoming concert(s):")
 
     for concert in matching_concerts:
         key = (concert["city_code"], concert["date"])
