@@ -348,31 +348,36 @@ def export_artist_data():
             print("Data successfully appended.")
 
 # !------- Task 5: Get Released Albums By Year by Salah -------!
+
 def get_released_albums_by_year():
-    year_input = input("Please enter a year: ").strip()
-    matching_albums = []
+    year = input("Please enter a year: ").strip()
+    if not year.isdigit():
+        print("Invalid year. Please enter a numeric value.")
+        return
 
-    for file in os.listdir(ALBUMS_DIR):
-        if file.endswith(".json"):
-            album_path = os.path.join(ALBUMS_DIR, file)
+    albums_found = []
+
+    for filename in os.listdir(ALBUMS_DIR):
+        if filename.endswith(".json"):
+            album_path = os.path.join(ALBUMS_DIR, filename)
             album_data = load_json(album_path)
-            items = album_data.get("items", [])
 
-            for album in items:
+            for album in album_data.get("items", []):
                 release_date = album.get("release_date", "")
-                if release_date:
-                    if release_date[:4] == year_input:
-                        name = album.get("name", "")
-                        artists = album.get("artists", [])
-                        if artists:
-                            artist_name = artists[0].get("name", "Unknown Artist")
-                            matching_albums.append((name, artist_name))
+                if release_date.startswith(year):
+                    album_name = album.get("name", "Unknown Album")
+                    artists = album.get("artists", [])
+                    artist_name = artists[0].get("name", "Unknown Artist") if artists else "Unknown Artist"
+                    albums_found.append((album_name, artist_name))
 
-    matching_albums.sort()
-    
-    print(f"Albums released in the year {year_input}:")
-    for name, artist in matching_albums:
-        print(f'- "{name}" by {artist}.')
+    if not albums_found:
+        print(f"No albums were released in the year {year}.")
+        return
+
+    albums_found.sort()
+    print(f"Albums released in the year {year}:")
+    for album_name, artist_name in albums_found:
+        print(f'- "{album_name}" by {artist_name}.')
 
 # !------- Task 6: Analyze Song Lyrics by Ali -------!
 def moosify_lyrics():
@@ -427,70 +432,135 @@ def calculate_longest_unique_sequence():
                     print(f"The length of the longest unique sequence in {entry.get('title')} is {max_len}")
 
 # !------- Task 8: Weather Forecast For Upcoming Concerts by Salah -------!
-def predict_weather_for_concerts():
-    upcoming_concerts = []
-    artists_set = set()
+import csv
+import datetime
+import os
 
-    with open(CONCERTS_CSV, "r", encoding="utf-8", newline="") as file:
-        for row in csv.DictReader(file):
+WEATHER_FIELDS = [
+    "precipitation", "date", "city", "city_code",
+    "temperature_avg", "temperature_max", "temperature_min",
+    "wind_direction", "wind_speed"
+]
+
+# Paths adapted to project structure
+CONCERTS_CSV = os.path.join("dataset", "concerts", "concerts.csv")
+WEATHER_CSV = os.path.join("dataset", "weather", "weather.csv")
+
+def read_concert_data():
+    concerts = []
+    artists = set()
+
+    if not os.path.isfile(CONCERTS_CSV):
+        print("Error: 'concerts.csv' file is missing.")
+        return concerts, sorted(artists)
+
+    with open(CONCERTS_CSV, "r", encoding="utf-8") as file:
+        reader = csv.DictReader(file)
+        for row in reader:
             artist = (row.get("artist") or "").strip()
             city_code = (row.get("city_code") or "").strip()
-            month = row.get("month")
-            day = row.get("day")
-            year = row.get("year")
+            month = row.get("month", "").strip()
+            day = row.get("day", "").strip()
+            year = row.get("year", "").strip()
 
-            if all([artist, city_code, month, day, year]):
-                month, day, year = int(month), int(day), int(year)
-                date = f"{year:04d}-{month:02d}-{day:02d}"
-                upcoming_concerts.append({
-                    "artist": artist,
-                    "city_code": city_code,
-                    "date": date
-                })
-                artists_set.add(artist)
+            if not all([artist, city_code, month, day, year]):
+                continue
+            if not (month.isdigit() and day.isdigit() and year.isdigit()):
+                continue
 
+            date = f"{int(year):04d}-{int(month):02d}-{int(day):02d}"
+            concerts.append({"artist": artist, "city_code": city_code, "date": date})
+            artists.add(artist)
 
-    print("Upcoming artists:")
-    for artist in sorted(artists_set):
-        print(f"- {artist}")
+    return concerts, sorted(artists)
 
-    artist_input = input("Please input the name of one of the following artists: ").strip()
-    print(f'Fetching weather forecast for "{artist_input}" concerts...')
+def read_weather_data():
+    weather_lookup = {}
 
-    artist_concerts = [
-        consert for consert in upcoming_concerts
-        if consert["artist"].lower() == artist_input.lower()
-    ]
+    if not os.path.isfile(WEATHER_CSV):
+        print("Error: 'weather.csv' file is missing.")
+        return weather_lookup
 
-    weather_data = {}
-    with open(WEATHER_CSV, "r", encoding="utf-8", newline="") as file:
+    with open(WEATHER_CSV, "r", encoding="utf-8") as file:
         reader = csv.DictReader(file)
-        reader.fieldnames = [name.strip('"') for name in reader.fieldnames]
-
         for row in reader:
             city_code = (row.get("city_code") or "").strip()
             date = (row.get("date") or "").strip()
-            if not (city_code and date):
-                continue
-            key = (city_code, date)
-            weather_data[key] = {k: (v or "").strip() for k, v in row.items()}
 
-    
-    field_order = [
-        "precipitation", "date", "city", "city_code",
-        "temperature_avg", "temperature_max", "temperature_min",
-        "wind_direction", "wind_speed"
+            if city_code and date:
+                key = (city_code, date)
+                weather_lookup[key] = {
+                    field: (row.get(field) or "").strip()
+                    for field in WEATHER_FIELDS
+                }
+
+    return weather_lookup
+
+def format_date(date_string):
+    date_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d")
+    day = date_obj.day
+    month = date_obj.strftime("%B")
+    year = date_obj.year
+
+    if day in [1, 21, 31]:
+        suffix = "st"
+    elif day in [2, 22]:
+        suffix = "nd"
+    elif day in [3, 23]:
+        suffix = "rd"
+    else:
+        suffix = "th"
+
+    return f"{month}, {day}{suffix} {year}"
+
+def forecast_message(weather):
+    try:
+        precipitation = float(weather.get("precipitation", "0"))
+    except ValueError:
+        return "No data."
+
+    if precipitation == 0:
+        return "Perfect weather!"
+    elif precipitation <= 2:
+        return "Wear warm clothes."
+    else:
+        return "Wear warm clothes. Bring an umbrella."
+
+def predict_weather_for_concerts():
+    concerts, artist_list = read_concert_data()
+    weather_data = read_weather_data()
+
+    if not concerts:
+        print("No upcoming concerts found.")
+        return
+
+    print("Upcoming artists:")
+    for artist in artist_list:
+        print(f"- {artist}")
+
+    artist_input = input("Please input the name of one of the following artists: ").strip()
+
+    matching_concerts = [
+        c for c in concerts if c["artist"].lower() == artist_input.lower()
     ]
-    print(",".join(f'"{f}"' for f in field_order))
 
-    for concert in artist_concerts:
+    if not matching_concerts:
+        print(f"No upcoming concerts found for '{artist_input}'.")
+        return
+
+    print(f"{artist_input.capitalize()} has {len(matching_concerts)} upcoming concert(s):")
+
+    for concert in matching_concerts:
         key = (concert["city_code"], concert["date"])
-        if key in weather_data:
-            row = [weather_data[key].get(f, "") for f in field_order]
-            print(",".join(f'"{v}"' for v in row))
+        weather = weather_data.get(key)
 
-    if not artist_concerts:
-        print(f'No concerts found for "{artist_input}".')
+        if weather:
+            city = weather.get("city", "Unknown City")
+            formatted_date = format_date(concert["date"])
+            message = forecast_message(weather)
+            print(f"– {city}, {formatted_date}. {message}")
+        else:
+            print(f"– {concert['city_code']}, {concert['date']}. Weather data not available.")
 
 # !------- Task 9: Search Song By Lyrics by Ali -------!
 def build_inverted_index():
