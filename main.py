@@ -349,122 +349,178 @@ def export_artist_data():
 
 # !------- Task 5: Get Released Albums By Year by Salah -------!
 def get_released_albums_by_year():
-    pass
+    year_input = input("Please enter a year: ").strip()
+    matching_albums = []
+
+    for file in os.listdir(ALBUMS_DIR):
+        if file.endswith(".json"):
+            album_path = os.path.join(ALBUMS_DIR, file)
+            album_data = load_json(album_path)
+            items = album_data.get("items", [])
+
+            for album in items:
+                release_date = album.get("release_date", "")
+                if not release_date:
+                    continue
+
+                if release_date[:4] == year_input:
+                    name = album.get("name", "")
+                    artists = album.get("artists", [])
+                    if artists:
+                        artist_name = artists[0].get("name", "Unknown Artist")
+                    else:
+                        artist_name = "Unknown Artist"
+                    matching_albums.append((name, artist_name))
+
+    
+    matching_albums.sort()
+
+    
+    print(f"Albums released in the year: {year_input}")
+    for name, artist in matching_albums:
+        print(f'- "{name}" by {artist}')
 
 # !------- Task 6: Analyze Song Lyrics by Ali -------!
 def moosify_lyrics():
     pass
 
 # !------- Task 7: Calculate Longest Unique Word Sequence In A Song by Ifty -------!
-def process_text_for_analysis(text):
-    text = re.sub(r'\s+', ' ', text)
+def propocess_text_for_analysis(text):
     text = text.lower()
-    text = re.sub(r"[^a-z0-9\s]", "", text)
-    text = re.sub(r"\s+", " ", text).strip()
-    words = text.split(" ")
-    processed_words = []
-    for word in words:
-        if word:
-            processed_words.append(word)
-    return processed_words
+    text = re.sub(r"[^\w\s']", " ", text)
+    text = re.sub(r"\s+", " ", text)
+    words = text.strip().split()
+
+    return words
 
 def calculate_longest_unique_sequence():
     songs = get_available_songs()
 
     if songs:
         print("Available songs:")
+
         for index, song in enumerate(songs):
             artist = song.get("artist") or "Unknown"
             print(f"{index + 1}. {song.get('title')} by {artist}")
-
+        
         choice = input("Please select one of the following songs (number): ").strip()
+        
         if choice.isdigit():
             choice = int(choice)
+
             if choice < 1 or choice > len(songs):
                 print("Invalid choice.")
                 return
-
+            
             entry = songs[choice - 1]
             lyrics = search_songs_by_keyword(entry)
 
             if lyrics:
-                words = process_text_for_analysis(lyrics)
+                words = propocess_text_for_analysis(lyrics)
+                seen = {}
+                start = 0
+                max_len = 0
 
-                if words:
-                    seen = {}
-                    start = 0
-                    max_len = 0
-
-                    for end, word in enumerate(words):
-                        if word in seen and seen[word] >= start:
-                            start = seen[word] + 1
-                        seen[word] = end
-                        max_len = max(max_len, end - start + 1)
-
-                    print(f"The length of the longest unique sequence in {entry.get('title')} is {max_len}")
+                for end in range(len(words)):
+                    word = words[end]
+                    if word in seen:
+                        start = max(start, seen[word] + 1)
+                    
+                    seen[word] = end
+                    max_len = max(max_len, end - start + 1)
+                
+                print(f"The length of the longest unique sequence in {entry.get('title')} is {max_len}")
+        else:
+            print("Invalid input.")
 
 # !------- Task 8: Weather Forecast For Upcoming Concerts by Salah -------!
 def predict_weather_for_concerts():
-    pass
+    import calendar
+
+    def ordinal(n):
+        if 11 <= n % 100 <= 13:
+            return f"{n}th"
+        return f"{n}{ {1: 'st', 2: 'nd', 3: 'rd'}.get(n % 10, 'th') }"
+
+    def parse_float(value):
+        try:
+            return float(value)
+        except (ValueError, TypeError):
+            return None
+
+    upcoming_concerts = []
+    artists_set = set()
+
+    with open(CONCERTS_CSV, "r", encoding="utf-8", newline="") as file:
+        for row in csv.DictReader(file):
+            artist = (row.get("artist") or "").strip()
+            city_code = (row.get("city_code") or "").strip()
+            month = row.get("month")
+            day = row.get("day")
+            year = row.get("year")
+
+            if not all([artist, city_code, month, day, year]):
+                continue
+
+            try:
+                m, d, y = int(month), int(day), int(year)
+            except ValueError:
+                continue
+
+            date = f"{y:04d}-{m:02d}-{d:02d}"
+            upcoming_concerts.append({
+                "artist": artist,
+                "city_code": city_code,
+                "date": date
+            })
+            artists_set.add(artist)
+
+
+    print("Upcoming artists:")
+    for a in sorted(artists_set):
+        print(f"- {a}")
+
+    artist_input = input("Please input the name of one of the following artists: ").strip()
+    print(f'Fetching weather forecast for "{artist_input}" concerts...')
+
+    artist_concerts = [
+        c for c in upcoming_concerts
+        if c["artist"].lower() == artist_input.lower()
+    ]
+
+    weather_data = {}
+    with open(WEATHER_CSV, "r", encoding="utf-8", newline="") as file:
+        reader = csv.DictReader(file)
+        reader.fieldnames = [name.strip('"') for name in reader.fieldnames]
+
+        for row in reader:
+            city_code = (row.get("city_code") or "").strip()
+            date = (row.get("date") or "").strip()
+            if not (city_code and date):
+                continue
+            key = (city_code, date)
+            weather_data[key] = {k: (v or "").strip() for k, v in row.items()}
+
+    
+    field_order = [
+        "precipitation", "date", "city", "city_code",
+        "temperature_avg", "temperature_max", "temperature_min",
+        "wind_direction", "wind_speed"
+    ]
+    print(",".join(f'"{f}"' for f in field_order))
+
+    for concert in artist_concerts:
+        key = (concert["city_code"], concert["date"])
+        if key in weather_data:
+            row = [weather_data[key].get(f, "") for f in field_order]
+            print(",".join(f'"{v}"' for v in row))
+
+    if not artist_concerts:
+        print(f'No concerts found for "{artist_input}".')
 
 # !------- Task 9: Search Song By Lyrics by Ali -------!
-def build_inverted_index():
-    inverted_index = {}
-    
-    for file in os.listdir(SONGS_DIR):
-        if file.endswith(".json"):
-            song_path = os.path.join(SONGS_DIR, file)
-            song_data = load_json(song_path)
-            
-            title = song_data.get("name", "") or song_data.get("title", "")
-            lyrics = song_data.get("lyrics", "")
-            
-            if lyrics and title:
-                words = process_text_for_analysis(lyrics)
-                
-                for word in words:
-                    if word not in inverted_index:
-                        inverted_index[word] = []
-                    if title not in inverted_index[word]:
-                        inverted_index[word].append(title)
-    
-    return inverted_index
-
-def load_or_create_inverted_index():
-    if os.path.exists(INVERTED_INDEX_FILE):
-        inverted_index = load_json(INVERTED_INDEX_FILE)
-    else:
-        inverted_index = build_inverted_index()
-        
-        with open(INVERTED_INDEX_FILE, "w", encoding="utf-8") as file:
-            json.dump(inverted_index, file, indent=2)
-    
-    return inverted_index
-
 def search_by_lyrics():
-    query = input("Please type the lyrics you'd like to search for: ").strip()
-    
-    if query:
-        query_words = process_text_for_analysis(query)
-        
-        if query_words:
-            inverted_index = load_or_create_inverted_index()
-            
-            song_scores = {}
-            
-            for word in query_words:
-                if word in inverted_index:
-                    for song in inverted_index[word]:
-                        if song not in song_scores:
-                            song_scores[song] = 0
-                        song_scores[song] += 1
-            
-            if song_scores:
-                sorted_songs = sorted(song_scores.items(), key=lambda x: x[1], reverse=True)
-                
-                print(f"Listing matches for '{query}'...")
-                for song, score in sorted_songs:
-                    print(f"- {song} with a score of {score}")
+    pass
 
 if __name__ == "__main__":
     main()
