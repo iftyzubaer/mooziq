@@ -367,7 +367,7 @@ def get_released_albums_by_year():
                 if release_date.startswith(year):
                     album_name = album.get("name", "Unknown Album")
                     artists = album.get("artists", [])
-                    artist_name = artists[0].get("name", "Unknown Artist") if artists else "Unknown Artist"
+                    artist_name = "".join(artist.get("name", "").lower().replace(" ", "") for artist in artists)
                     albums_found.append((album_name, artist_name))
 
     if not albums_found:
@@ -436,15 +436,15 @@ import csv
 import datetime
 import os
 
+# Use dataset folder paths
+CONCERTS_CSV = os.path.join("dataset", "concerts", "concerts.csv")
+WEATHER_CSV = os.path.join("dataset", "weather", "weather.csv")
+
 WEATHER_FIELDS = [
     "precipitation", "date", "city", "city_code",
     "temperature_avg", "temperature_max", "temperature_min",
     "wind_direction", "wind_speed"
 ]
-
-# Paths adapted to project structure
-CONCERTS_CSV = os.path.join("dataset", "concerts", "concerts.csv")
-WEATHER_CSV = os.path.join("dataset", "weather", "weather.csv")
 
 def read_concert_data():
     concerts = []
@@ -459,7 +459,7 @@ def read_concert_data():
         for row in reader:
             artist = (row.get("artist") or "").strip()
             city_code = (row.get("city_code") or "").strip()
-            month = row.get("month", "").strip()
+            month = row.get("month" "").strip()
             day = row.get("day", "").strip()
             year = row.get("year", "").strip()
 
@@ -469,7 +469,11 @@ def read_concert_data():
                 continue
 
             date = f"{int(year):04d}-{int(month):02d}-{int(day):02d}"
-            concerts.append({"artist": artist, "city_code": city_code, "date": date})
+            concerts.append({
+                "artist": artist,
+                "city_code": city_code,
+                "date": date
+            })
             artists.add(artist)
 
     return concerts, sorted(artists)
@@ -497,6 +501,7 @@ def read_weather_data():
     return weather_lookup
 
 def format_date(date_string):
+    """Convert YYYY-MM-DD to 'Month Day{suffix} Year' format."""
     date_obj = datetime.datetime.strptime(date_string, "%Y-%m-%d")
     day = date_obj.day
     month = date_obj.strftime("%B")
@@ -511,7 +516,7 @@ def format_date(date_string):
     else:
         suffix = "th"
 
-    return f"{month}, {day}{suffix} {year}"
+    return f"{month} {day}{suffix} {year}"
 
 def forecast_message(weather):
     try:
@@ -540,6 +545,8 @@ def predict_weather_for_concerts():
 
     artist_input = input("Please input the name of one of the following artists: ").strip()
 
+    print(f'\nFetching weather forecast for "{artist_input.upper()}" concerts...')
+
     matching_concerts = [
         c for c in concerts if c["artist"].lower() == artist_input.lower()
     ]
@@ -548,7 +555,11 @@ def predict_weather_for_concerts():
         print(f"No upcoming concerts found for '{artist_input}'.")
         return
 
-    print(f"{artist_input.capitalize()} has {len(matching_concerts)} upcoming concert(s):")
+    num = len(matching_concerts)
+    if num == 1:
+        print(f"{artist_input.upper()} has 1 upcoming concert:")
+    else:
+        print(f"{artist_input.upper()} has {num} upcoming concerts:")
 
     for concert in matching_concerts:
         key = (concert["city_code"], concert["date"])
@@ -558,10 +569,9 @@ def predict_weather_for_concerts():
             city = weather.get("city", "Unknown City")
             formatted_date = format_date(concert["date"])
             message = forecast_message(weather)
-            print(f"– {city}, {formatted_date}. {message}")
+            print(f"- {city}, {formatted_date}. {message}")
         else:
-            print(f"– {concert['city_code']}, {concert['date']}. Weather data not available.")
-
+            print(f"- {concert['city_code']}, {concert['date']}. Weather data not available.")
 
 # !------- Task 9: Search Song By Lyrics by Ali -------!
 def build_inverted_index():
