@@ -347,8 +347,8 @@ def export_artist_data():
         else:
             print("Data successfully appended.")
 
-# !------- Task 5: Get Released Albums By Year by Salah -------!
 
+# !------- Task 5: Get Released Albums By Year by Salah -------!
 def get_released_albums_by_year():
     year = input("Please enter a year: ").strip()
     if not year.isdigit():
@@ -561,6 +561,7 @@ def predict_weather_for_concerts():
             print(f"– {city}, {formatted_date}. {message}")
         else:
             print(f"– {concert['city_code']}, {concert['date']}. Weather data not available.")
+
 
 # !------- Task 9: Search Song By Lyrics by Ali -------!
 def build_inverted_index():
