@@ -459,6 +459,36 @@ def get_released_albums_by_year():
 # !------- Task 6: Analyze Song Lyrics by Ali -------!
 def moosify_lyrics():
     pass
+SONGS_DIR = "./dataset"
+MOOSE_DIR = "./moosified"
+lyrics = search_songs_by_keyword()
+
+if not lyrics:
+        print("Lyrics not found")
+        
+if not re.search(r'mo|\!|\?', lyrics, re.IGNORECASE):
+        title = ().get("title", "Unknown")
+        artist = ().get("artist", "")
+        song_info = f"{title} by {artist}" if artist else title
+        print(f"{song_info} is not moose-compatible!")
+
+        moosified = re.sub(r'\b\w*mo\w*\b', "moo", lyrics, flags=re.IGNORECASE)
+        moosified = re.sub(r'[!?]', "moo", moosified)
+
+        title = ().get("title", "Unknown")
+        filename = f"{title} Moosified.txt"
+        os.makedirs(MOOSE_DIR, exist_ok=True)
+        filepath = os.path.join(MOOSE_DIR, filename)
+
+        try:
+            with open(filepath, "w", encoding="utf-8") as file:
+                file.write(moosified)
+        except IOError:
+            print(f"Error: Could not write to file - {filepath}")
+
+        artist = ().get("artist", "")
+        song_info = f"{title} by {artist}" if artist else title
+
 
 # !------- Task 7: Calculate Longest Unique Word Sequence In A Song by Ifty -------!
 def process_text_for_analysis(text):
