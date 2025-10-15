@@ -133,7 +133,7 @@ def print_menu():
 def main():
     option = 0
 
-    print("\nWelcome to Mooziq!")
+    print("Welcome to Mooziq!")
     print("Choose one of the options bellow:\n")
 
     while option != 10:
@@ -187,7 +187,7 @@ def read_all_artists():
 def get_all_artists():
     artists = read_all_artists()
     if artists:
-        print("Artists found in the database:")
+        print("\nArtists found in the database:")
         for name in artists:
             print(f"- {name}")
     else:
@@ -246,7 +246,15 @@ def formated_date(date_str, precision):
     return f"{month_name} {ordinal(day)} {year}"
 
 def get_albums_by_artist():
-    artist_name = input("Please input the name of an artist: ").strip()
+    artists = read_all_artists()
+    
+    if artists:
+        for name in artists:
+            print(f"- {name}")
+    else:
+        print("No artists found in the database.")
+
+    artist_name = input("Please input the name of one of the following artists: ").strip()
     artist_file, artist_data = find_artist_by_name(artist_name)
     
     if artist_file:
@@ -274,7 +282,15 @@ def get_albums_by_artist():
 
 # !------- Task 3: Get Top Tracks By An Artist by Ifty -------!
 def get_top_tracks_by_artist():
-    artist_name = input("Please input the name of an artist: ").strip()
+    artists = read_all_artists()
+    
+    if artists:
+        for name in artists:
+            print(f"- {name}")
+    else:
+        print("No artists found in the database.")
+
+    artist_name = input("Please input the name of one of the following artists: ").strip()
     artist_file, artist_data = find_artist_by_name(artist_name)
     
     if not artist_file:
@@ -294,7 +310,7 @@ def get_top_tracks_by_artist():
         return
     
     tracks = top_data.get('tracks', [])
-    print(f"Listing top tracks for {artist_name}...")
+    print(f"Listing top tracks for {artist_name.title()}...")
 
     for track in tracks:
         name = track.get('name', '')
