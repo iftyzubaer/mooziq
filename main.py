@@ -419,7 +419,6 @@ def export_artist_data():
     else:
         print(f"Artist '{artist_name_input}' not found.")
 
-
 # !------- Task 5: Get Released Albums By Year by Salah -------!
 def get_released_albums_by_year():
     year = input("Please enter a year: ").strip()
@@ -458,37 +457,33 @@ def get_released_albums_by_year():
 
 # !------- Task 6: Analyze Song Lyrics by Ali -------!
 def moosify_lyrics():
-    pass
-SONGS_DIR = "./dataset"
-MOOSE_DIR = "./moosified"
-lyrics = search_songs_by_keyword()
+    lyrics = search_songs_by_keyword()
 
-if not lyrics:
-        print("Lyrics not found")
-        
-if not re.search(r'mo|\!|\?', lyrics, re.IGNORECASE):
-        title = ().get("title", "Unknown")
-        artist = ().get("artist", "")
-        song_info = f"{title} by {artist}" if artist else title
-        print(f"{song_info} is not moose-compatible!")
+    if not lyrics:
+            print("Lyrics not found")
+            
+    if not re.search(r'mo|\!|\?', lyrics, re.IGNORECASE):
+            title = ().get("title", "Unknown")
+            artist = ().get("artist", "")
+            song_info = f"{title} by {artist}" if artist else title
+            print(f"{song_info} is not moose-compatible!")
 
-        moosified = re.sub(r'\b\w*mo\w*\b', "moo", lyrics, flags=re.IGNORECASE)
-        moosified = re.sub(r'[!?]', "moo", moosified)
+            moosified = re.sub(r'\b\w*mo\w*\b', "moo", lyrics, flags=re.IGNORECASE)
+            moosified = re.sub(r'[!?]', "moo", moosified)
 
-        title = ().get("title", "Unknown")
-        filename = f"{title} Moosified.txt"
-        os.makedirs(MOOSE_DIR, exist_ok=True)
-        filepath = os.path.join(MOOSE_DIR, filename)
+            title = ().get("title", "Unknown")
+            filename = f"{title} Moosified.txt"
+            os.makedirs(MOOSIFIED_DIR, exist_ok=True)
+            filepath = os.path.join(MOOSIFIED_DIR, filename)
 
-        try:
-            with open(filepath, "w", encoding="utf-8") as file:
-                file.write(moosified)
-        except IOError:
-            print(f"Error: Could not write to file - {filepath}")
+            try:
+                with open(filepath, "w", encoding="utf-8") as file:
+                    file.write(moosified)
+            except IOError:
+                print(f"Error: Could not write to file - {filepath}")
 
-        artist = ().get("artist", "")
-        song_info = f"{title} by {artist}" if artist else title
-
+            artist = ().get("artist", "")
+            song_info = f"{title} by {artist}" if artist else title
 
 # !------- Task 7: Calculate Longest Unique Word Sequence In A Song by Ifty -------!
 def process_text_for_analysis(text):
@@ -556,9 +551,6 @@ WEATHER_FIELDS = [
     "temperature_avg", "temperature_max", "temperature_min",
     "wind_direction", "wind_speed"
 ]
-
-CONCERTS_CSV = os.path.join("dataset", "concerts", "concerts.csv")
-WEATHER_CSV = os.path.join("dataset", "weather", "weather.csv")
 
 def read_concert_data():
     concerts = []
@@ -704,7 +696,7 @@ def predict_weather_for_concerts():
         else:
             print(f"- {concert['city_code']}, {concert['date']}. Weather data not available.")
 
-# !------- Task 9: Search Song By Lyrics by Ali -------!
+# !------- Task 9: Search Song By Lyrics by Ifty -------!
 def build_inverted_index():
     inverted_index = {}
     
