@@ -16,12 +16,14 @@ Task Division
 - Task 3: Ifty implemented the Get Top Tracks By An Artist. 
 - Task 4: Ifty implemented the Export Artist Data.  
 - Task 5: Salah implemented the Get Released Albums By Year.
-- Task 6: Ali implemented the Song Creativity Score (Moosify Lyrics).
+- Task 6: Ifty implemented the Song Creativity Score (Moosify Lyrics).
 - Task 7: Ifty implemented the Calculate Longest Unique Word Sequence in a Song.
 - Task 8: Salah implemented the Weather Forecast For Upcoming Concerts.
 - Task 9: Ifty implemented the Search Song By Lyrics (Inverted Index).
 - Each member implemented the error handling for their own tasks.  
 - Code Review / Project Review: Ifty also acted as the reviewer for the project. This also included helping group members debug and improve their tasks when needed, to ensure that the entire project was consistent and working correctly.
+
+NOTE: In our group, we divided the work into 3 tasks each and the project setup part on Ifty. I (Ifty) finished my assigned tasks early, but since no one else had started and the assignment was a bit challenging, I took 2 extra tasks (one from each teammate). Salah has been working steadily on his part, but Ali was not responsive for most of the time. On our internal deadline (14 Oct), Ali asked me to do one of his tasks as well, which I completed. This left him with only one remaining task. However, the code he submitted for that was incomplete and not working, which caused us to miss our internal feedback deadline with the TA. After discussing the situation with a TA, I set a new deadline for Ali on 16 Oct. He submitted again, but the code still didn’t run. On 17 Oct, he said he couldn’t solve the task despite trying. I discussed it again with the TA and, to ensure progress, I assigned Task 6 to myself to complete.
 
 =====================================================
 Project Description

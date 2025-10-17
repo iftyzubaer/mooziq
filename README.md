@@ -1,7 +1,7 @@
 Assignment 2: Mooziq
 ====================
 
-Authors: Ifty Zubaer, Salah Alabdullah, and Ali Hamza  
+Authors: Ifty Zubaer and Salah Alabdullah  
 Group: Ifty Salah Ali  
 Course: DIT009 – Fundamentals of Programming
 
@@ -16,7 +16,7 @@ Task Division
 - Task 3: **Ifty** implemented the Get Top Tracks By An Artist. 
 - Task 4: **Ifty** implemented the Export Artist Data.  
 - Task 5: **Salah** implemented the Get Released Albums By Year.
-- Task 6: **Ali** implemented the Song Creativity Score (Moosify Lyrics).
+- Task 6: **Ifty** implemented the Song Creativity Score (Moosify Lyrics).
 - Task 7: **Ifty** implemented the Calculate Longest Unique Word Sequence in a Song.
 - Task 8: **Salah** implemented the Weather Forecast For Upcoming Concerts.
 - Task 9: **Ifty** implemented the Search Song By Lyrics (Inverted Index).
