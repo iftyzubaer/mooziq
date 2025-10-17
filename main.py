@@ -458,8 +458,6 @@ def get_released_albums_by_year():
 
 # !------- Task 6: Analyze Song Lyrics by Ali -------!
 def moosify_lyrics(song_entry):
-    MOOSE_DIR = "./moosified"
-
     lyrics = search_songs_by_keyword(song_entry)
     if not lyrics:
         print("Lyrics not found.")
@@ -476,9 +474,9 @@ def moosify_lyrics(song_entry):
     moosified = re.sub(r"\b\w*mo\w*\b", lambda m: re.sub(r"mo", "moo", m.group(0), flags=re.IGNORECASE), lyrics, flags=re.IGNORECASE)
     moosified = re.sub(r"([!?])", r"\1moo", moosified)
 
-    os.makedirs(MOOSE_DIR, exist_ok=True)
+    os.makedirs(MOOSIFIED_DIR, exist_ok=True)
     filename = f"{title} Moosified.txt"
-    filepath = os.path.join(MOOSE_DIR, filename)
+    filepath = os.path.join(MOOSIFIED_DIR, filename)
 
     try:
         with open(filepath, "w", encoding="utf-8") as f:
@@ -486,22 +484,22 @@ def moosify_lyrics(song_entry):
     except IOError:
         print(f"Error: Could not write to file - {filepath}")
         return
-moose = (
-"_      _\n"
-"/ \\    / \\\n"
-"\\_ \\   / ___/\n"
-" || || / /_\n"
-"\\_ \\__/ ___/\n"
-"  \\__  __/\n"
-"   | @ @ \\___\n"
-"   |\n"
-"  __/  /\\\n"
-" /o) (o/\\ \\___\n"
-" \\___/ /\n"
-"  \\__/\n"
-)
+    moose = (
+    "_      _\n"
+    "/ \\    / \\\n"
+    "\\_ \\   / ___/\n"
+    " || || / /_\n"
+    "\\_ \\__/ ___/\n"
+    "  \\__  __/\n"
+    "   | @ @ \\___\n"
+    "   |\n"
+    "  __/  /\\\n"
+    " /o) (o/\\ \\___\n"
+    " \\___/ /\n"
+    "  \\__/\n"
+    )
 
-print(moose)
+    print(moose)
     
 # !------- Task 7: Calculate Longest Unique Word Sequence In A Song by Ifty -------!
 def process_text_for_analysis(text):
@@ -569,9 +567,6 @@ WEATHER_FIELDS = [
     "temperature_avg", "temperature_max", "temperature_min",
     "wind_direction", "wind_speed"
 ]
-
-CONCERTS_CSV = os.path.join("dataset", "concerts", "concerts.csv")
-WEATHER_CSV = os.path.join("dataset", "weather", "weather.csv")
 
 def read_concert_data():
     concerts = []
@@ -717,7 +712,7 @@ def predict_weather_for_concerts():
         else:
             print(f"- {concert['city_code']}, {concert['date']}. Weather data not available.")
 
-# !------- Task 9: Search Song By Lyrics by Ali -------!
+# !------- Task 9: Search Song By Lyrics by Ifty -------!
 def build_inverted_index():
     inverted_index = {}
     
