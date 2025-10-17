@@ -332,40 +332,52 @@ def export_artist_data():
         print(f"Artist '{artist_name_input}' not found.")
 
 # !------- Task 5: Get Released Albums By Year by Salah -------!
+import os
+
 def get_released_albums_by_year():
-    year = input("Please enter a year: ").strip()
-    if not year.isdigit():
+    year_input = input("Please enter a year: ").strip()
+    matching_albums = []
+
+    if not year_input.isdigit():
         print("Invalid year. Please enter a numeric value.")
         return
 
-    albums_found = []
+    main_artists = read_all_artists()  
 
-    for filename in os.listdir(ALBUMS_DIR):
-        if filename.endswith(".json"):
-            album_path = os.path.join(ALBUMS_DIR, filename)
+    for file in os.listdir(ALBUMS_DIR):
+        if file.endswith(".json"):
+            album_path = os.path.join(ALBUMS_DIR, file)
             album_data = load_json(album_path)
+            items = album_data.get("items", [])
 
-            for album in album_data.get("items", []):
+            for album in items:
                 release_date = album.get("release_date", "")
-                if release_date.startswith(year):
-                    album_name = album.get("name", "Unknown Album")
+                if release_date and release_date[:4] == year_input:
+                    name = album.get("name", "").strip()
+
                     artists = album.get("artists", [])
+                    artist = "Unknown Artist"
 
-                    artist_name = ", ".join(
-                        artist.get("name", "Unknown Artist").strip()
-                        for artist in artists
-                    )
+                    for a in artists:
+                        artist_name = a.get("name", "").strip()
+                        if artist_name in main_artists:
+                            artist = artist_name
+                            break
 
-                    albums_found.append((album_name, artist_name))
+                    if artist == "Unknown Artist" and artists:
+                        artist = artists[0].get("name", "Unknown Artist").strip()
 
-    if not albums_found:
-        print(f"No albums were released in the year {year}.")
+                    matching_albums.append((name, artist))
+
+    if not matching_albums:
+        print(f"No albums were released in the year {year_input}.")
         return
 
-    albums_found.sort()
-    print(f"Albums released in the year {year}:")
-    for album_name, artist_name in albums_found:
-        print(f'- "{album_name}" by {artist_name}.')
+    matching_albums.sort(key=lambda x: x[0])
+
+    print(f"albums released in the year {year_input}:")
+    for name, artist in matching_albums:
+        print(f'- "{name}" by {artist}.')
 
 # !------- Task 6: Analyze Song Lyrics by Ifty -------!
 def get_available_songs():
