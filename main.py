@@ -474,51 +474,66 @@ def print_moose():
 """)
     print(moose)
 
+def print_song_list(songs):
+    print("Available songs:")
+    for index, song in enumerate(songs, 1):
+        artist = song.get("artist", "Unknown")
+        title = song.get("title")
+        print(f"{index}. {title} by {artist}")
+
+def get_valid_song_choice(songs):
+    choice = input("Please select one of the following songs (number): ").strip()
+    
+    if choice.isdigit():
+        choice = int(choice) - 1
+        if choice >= 0 and choice < len(songs):
+            return songs[choice]
+        else:
+            print(INVALID_CHOICE_MESSAGE)
+            return None
+    else:
+        print(INVALID_CHOICE_MESSAGE)
+        return None
+
+def save_moosified_lyrics(title, moosified_lyrics):
+    if not os.path.exists(MOOSIFIED_DIR):
+        os.makedirs(MOOSIFIED_DIR)
+    
+    filename = f"{title} Moosified.txt"
+    file_path = os.path.join(MOOSIFIED_DIR, filename)
+    
+    with open(file_path, "w", encoding="utf-8") as file:
+        file.write(moosified_lyrics)
+    
+    return filename
+
+def process_moosification(entry):
+    title = entry.get("title")
+    artist = entry.get("artist", "Unknown")
+    lyrics = search_songs_by_keyword(entry)
+    
+    if lyrics:
+        if can_be_moosified(lyrics):
+            moosified_lyrics = moosify_text(lyrics)
+            filename = save_moosified_lyrics(title, moosified_lyrics)
+            
+            print(f"{title} by {artist} has been moos-ified!")
+            print(f"File saved at ./moosified/{filename}")
+            print_moose()
+        else:
+            print(f"{title} by {artist} is not moose-compatible!")
+    else:
+        print(f"{title} has no lyrics available.")
+
 def moosify_lyrics():
     songs = get_available_songs()
     
     if songs:
-        print("Available songs:")
-        index = 0
-        for song in songs:
-            artist = song.get("artist", "Unknown")
-            print(f"{index + 1}. {song.get("title")} by {artist}")
-            index += 1
+        print_song_list(songs)
+        entry = get_valid_song_choice(songs)
         
-        choice = input("Please select one of the following songs (number): ").strip()
-        
-        if choice.isdigit():
-            choice = int(choice) - 1
-            if choice >= 0 and choice < len(songs):
-                entry = songs[choice]
-                title = entry.get("title")
-                artist = entry.get("artist", "Unknown")
-                lyrics = search_songs_by_keyword(entry)
-                
-                if lyrics:
-                    if can_be_moosified(lyrics):
-                        moosified_lyrics = moosify_text(lyrics)
-                        
-                        if not os.path.exists(MOOSIFIED_DIR):
-                            os.makedirs(MOOSIFIED_DIR)
-                        
-                        filename = f"{title} Moosified.txt"
-                        file_path = os.path.join(MOOSIFIED_DIR, filename)
-                        
-                        with open(file_path, "w", encoding="utf-8") as file:
-                            file.write(moosified_lyrics)
-                        
-                        print(f"{title} by {artist} has been moos-ified!")
-                        print(f"File saved at ./moosified/{filename}")
-                        print_moose()
-                    else:
-                        print(f"{title} by {artist} is not moose-compatible!")
-                else:
-                    print(f"{title} has no lyrics available.")
-            else:
-                print(INVALID_CHOICE_MESSAGE)
-        else:
-            print(INVALID_CHOICE_MESSAGE)
+        if entry:
+            process_moosification(entry)
     else:
         print("No songs available.")
 
@@ -529,53 +544,52 @@ def process_text_for_analysis(text):
     words = text.split()
     return words
 
-def calculate_longest_unique_sequence():
-    songs = get_available_songs()
+def print_song_list(songs):
+    print("Available songs:")
+    for index, song in enumerate(songs, 1):
+        artist = song.get("artist", "Unknown")
+        title = song.get("title")
+        print(f"{index}. {title} by {artist}")
 
-    if songs:
-        print("Available songs:")
-        index = 0
-        for song in songs:
-            artist = song.get("artist", "Unknown")
-            print(f"{index + 1}. {song.get("title")} by {artist}")
-            index += 1
-
-        choice = input("Please select one of the following songs (number): ").strip()
+def find_longest_unique_sequence(words):
+    seen = {}
+    start = 0
+    max_length = 0
+    
+    for position, word in enumerate(words):
+        if word in seen and seen[word] >= start:
+            start = seen[word] + 1
         
-        if choice.isdigit():
-            choice = int(choice)
-            if choice >= 1 and choice <= len(songs):
-                entry = songs[choice - 1]
-                lyrics = search_songs_by_keyword(entry)
+        seen[word] = position
+        current_length = position - start + 1
+        max_length = max(max_length, current_length)
+    
+    return max_length
 
-                if lyrics:
-                    words = process_text_for_analysis(lyrics)
-
-                    if words:
-                        seen = {}
-                        start = 0
-                        max_length = 0
-
-                        for position in range(len(words)):
-                            word = words[position]
-                            
-                            if word in seen and seen[word] >= start:
-                                start = seen[word] + 1
-                            
-                            seen[word] = position
-                            
-                            current_length = position - start + 1
-                            max_length = max(max_length, current_length)
-
-                        print(f"The length of the longest unique sequence in {entry.get("title")} is {max_length}")
-                    else:
-                        print("No valid words found in the lyrics.")
-                else:
-                    print("No lyrics found for this song.")
-            else:
-                print(INVALID_CHOICE_MESSAGE)
+def process_song_analysis(entry):
+    title = entry.get("title")
+    lyrics = search_songs_by_keyword(entry)
+    
+    if lyrics:
+        words = process_text_for_analysis(lyrics)
+        
+        if words:
+            max_length = find_longest_unique_sequence(words)
+            print(f"The length of the longest unique sequence in {title} is {max_length}")
         else:
-            print(INVALID_CHOICE_MESSAGE)
+            print("No valid words found in the lyrics.")
+    else:
+        print("No lyrics found for this song.")
+
+def calculate_longest_unique_sequence():  
+    songs = get_available_songs()
+    
+    if songs:
+        print_song_list(songs)
+        entry = get_valid_song_choice(songs)
+        
+        if entry:
+            process_song_analysis(entry)
     else:
         print("No songs available.")
 
