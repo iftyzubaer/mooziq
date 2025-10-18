@@ -100,14 +100,18 @@ def read_all_artists():
                 artists.append(artists_data.get("name", ""))
     return artists
 
-def get_all_artists():
-    artists = read_all_artists()
+def print_artists(artists):
     if artists:
-        print("\nArtists found in the database:")
         for name in artists:
             print(f"- {name}")
     else:
         print(NO_ARTIST_MESSAGE)
+
+def get_all_artists():
+    artists = read_all_artists()
+    if artists:
+        print("\nArtists found in the database:")
+        print_artists(artists)
 
 # !------- Task 2: Get All Albums By An Artist by Ifty -------!
 def find_artist_by_name(name):
@@ -164,12 +168,7 @@ def format_date(date_str, precision):
 def get_albums_by_artist():
     artists = read_all_artists()
     
-    if artists:
-        for name in artists:
-            print(f"- {name}")
-    else:
-        print(NO_ARTIST_MESSAGE)
-
+    print_artists(artists)
     artist_name = input(INPUT_ARTIST_NAME_MESSAGE).strip()
     artist_file, artist_data = find_artist_by_name(artist_name)
     
@@ -197,14 +196,28 @@ def get_albums_by_artist():
         print(f"Artist '{artist_name}' not found.")
 
 # !------- Task 3: Get Top Tracks By An Artist by Ifty -------!
+def print_tracks(tracks, artist_name):
+    print(f"Listing top tracks for {artist_name.title()}...")
+
+    for track in tracks:
+        name = track.get("name", "")
+        popularity = track.get("popularity", 0)
+
+        if popularity <= 30:
+            message = "No one knows this song."
+        elif popularity <= 50:
+            message = "Popular song."
+        elif popularity <= 70:
+            message = "It is quite popular now!"
+        else:
+            message = "It is made for the charts!"
+
+        print(f"- \"{name}\" has a popularity score of {popularity}. {message}")
+
 def get_top_tracks_by_artist():
     artists = read_all_artists()
-    
-    if artists:
-        for name in artists:
-            print(f"- {name}")
-    else:
-        print(NO_ARTIST_MESSAGE)
+
+    print_artists(artists)
 
     artist_name = input(INPUT_ARTIST_NAME_MESSAGE).strip()
     artist_file, artist_data = find_artist_by_name(artist_name)
@@ -217,22 +230,7 @@ def get_top_tracks_by_artist():
             top_data = load_json(top_file)
             if top_data:
                 tracks = top_data.get("tracks", [])
-                print(f"Listing top tracks for {artist_name.title()}...")
-
-                for track in tracks:
-                    name = track.get("name", "")
-                    popularity = track.get("popularity", 0)
-
-                    if popularity <= 30:
-                        message = "No one knows this song."
-                    elif popularity <= 50:
-                        message = "Popular song."
-                    elif popularity <= 70:
-                        message = "It is quite popular now!"
-                    else:
-                        message = "It is made for the charts!"
-
-                    print(f"- \"{name}\" has a popularity score of {popularity}. {message}")
+                print_tracks(tracks, artist_name)
             else:
                 print(f"No top tracks found for artist '{artist_name}'.")
         else:
@@ -267,69 +265,65 @@ def write_artists_data_csv(rows):
 
 def export_artist_data():
     artists = read_all_artists()
-    if artists:
-        for name in artists:
-            print(f"- {name}")
-        artist_name_input = input(INPUT_ARTIST_NAME_MESSAGE).strip()
+    print_artists(artists)
+    artist_name_input = input(INPUT_ARTIST_NAME_MESSAGE).strip()
 
-        artist_file, artist_data = find_artist_by_name(artist_name_input)
-        if artist_file:
-            artist_name = artist_data.get("name", artist_name_input)
-            artist_id = artist_data.get("id")
+    artist_file, artist_data = find_artist_by_name(artist_name_input)
+    if artist_file:
+        artist_name = artist_data.get("name", artist_name_input)
+        artist_id = artist_data.get("id")
 
-            album_file = os.path.join(ALBUMS_DIR, f"{artist_id}.json")
-            num_albums = 0
-            if os.path.exists(album_file):
-                album_data = load_json(album_file)
-                if album_data:
-                    num_albums = len(album_data.get("items", []))
+        album_file = os.path.join(ALBUMS_DIR, f"{artist_id}.json")
+        num_albums = 0
+        if os.path.exists(album_file):
+            album_data = load_json(album_file)
+            if album_data:
+                num_albums = len(album_data.get("items", []))
 
-            top_file = os.path.join(TOP_TRACKS_DIR, f"{artist_id}.json")
-            top1 = top2 = ""
-            if os.path.exists(top_file):
-                top_data = load_json(top_file)
-                if top_data:
-                    tracks = top_data.get("tracks", [])
-                    if len(tracks) > 0:
-                        top1 = tracks[0].get("name", "")
-                    if len(tracks) > 1:
-                        top2 = tracks[1].get("name", "")
+        top_file = os.path.join(TOP_TRACKS_DIR, f"{artist_id}.json")
+        top1 = top2 = ""
+        if os.path.exists(top_file):
+            top_data = load_json(top_file)
+            if top_data:
+                tracks = top_data.get("tracks", [])
+                if len(tracks) > 0:
+                    top1 = tracks[0].get("name", "")
+                if len(tracks) > 1:
+                    top2 = tracks[1].get("name", "")
 
-            genres = artist_data.get("genres", [])
-            genres_str = ", ".join(genres) if genres else ""
+        genres = artist_data.get("genres", [])
+        genres_str = ", ".join(genres) if genres else ""
 
-            rows = read_artists_data_csv()
-            found = False
-            for row in rows:
-                if row.get("artist_id", "").strip() == artist_id.strip():
-                    row["artist_name"] = artist_name
-                    row["number_of_albums"] = str(num_albums)
-                    row["top_track_1"] = top1
-                    row["top_track_2"] = top2
-                    row["genres"] = genres_str
-                    found = True
+        rows = read_artists_data_csv()
+        found = False
+        for row in rows:
+            if row.get("artist_id", "").strip() == artist_id.strip():
+                row["artist_name"] = artist_name
+                row["number_of_albums"] = str(num_albums)
+                row["top_track_1"] = top1
+                row["top_track_2"] = top2
+                row["genres"] = genres_str
+                found = True
 
-            if not found:
-                rows.append({
-                    "artist_id": artist_id,
-                    "artist_name": artist_name,
-                    "number_of_albums": str(num_albums),
-                    "top_track_1": top1,
-                    "top_track_2": top2,
-                    "genres": genres_str
-                })
+        if not found:
+            rows.append({
+                "artist_id": artist_id,
+                "artist_name": artist_name,
+                "number_of_albums": str(num_albums),
+                "top_track_1": top1,
+                "top_track_2": top2,
+                "genres": genres_str
+            })
 
-            write_artists_data_csv(rows)
+        write_artists_data_csv(rows)
 
-            print(f"Exporting \"{artist_name}\" data to CSV file...")
-            if found:
-                print("Data successfully updated.")
-            else:
-                print("Data successfully appended.")
+        print(f"Exporting \"{artist_name}\" data to CSV file...")
+        if found:
+            print("Data successfully updated.")
         else:
-            print(f"Artist '{artist_name_input}' not found.")
+            print("Data successfully appended.")
     else:
-        print(NO_ARTIST_MESSAGE)
+        print(f"Artist '{artist_name_input}' not found.")
 
 # !------- Task 5: Get Released Albums By Year by Salah -------!
 def read_all_artists():
