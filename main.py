@@ -673,46 +673,38 @@ def forecast_message(weather):
 
     return " ".join(messages)
 
+def print_concert_weather(concert, weather_data):
+    key = (concert["city_code"], concert["date"])
+    weather = weather_data.get(key)
+    
+    if weather:
+        city = weather.get("city", "Unknown City")
+        formatted_date = format_date(concert["date"], "day")
+        message = forecast_message(weather)
+        print(f"- {city}, {formatted_date}. {message}")
+    else:
+        print(f"- {concert['city_code']}, {concert['date']}. Weather data not available.")
+
 def predict_weather_for_concerts():
     concerts, artist_list = read_concert_data()
     weather_data = read_weather_data()
-
+    
     if concerts:
         print("Upcoming artists:")
-        for artist in artist_list:
-            print(f"- {artist}")
-
-        artist_input = input(INPUT_ARTIST_NAME_MESSAGE).strip()
-
-        matching_concerts = []
+        print_artists(artist_list)
         
-        for concert in concerts:
-            if concert["artist"].lower() == artist_input.lower():
-                matching_concerts.append(concert)
-
+        artist_input = input(INPUT_ARTIST_NAME_MESSAGE).strip()
+        matching_concerts = [c for c in concerts if c["artist"].lower() == artist_input.lower()]
+        
         if matching_concerts:
             formatted_artist = next((a for a in artist_list if a.lower() == artist_input.lower()), artist_input)
-
-            print(f"Fetching weather forecast for \"{formatted_artist}\" concerts...")
+            concert_word = "concert" if len(matching_concerts) == 1 else "concerts"
             
-            if len(matching_concerts) == 1:
-                concert_word = "concert"
-            else:
-                concert_word = "concerts"
-
+            print(f"Fetching weather forecast for \"{formatted_artist}\" concerts...")
             print(f"{formatted_artist} has {len(matching_concerts)} upcoming {concert_word}:")
-
+            
             for concert in matching_concerts:
-                key = (concert["city_code"], concert["date"])
-                weather = weather_data.get(key)
-
-                if weather:
-                    city = weather.get("city", "Unknown City")
-                    formatted_date = format_date(concert["date"], "day")
-                    message = forecast_message(weather)
-                    print(f"- {city}, {formatted_date}. {message}")
-                else:
-                    print(f"- {concert["city_code"]}, {concert["date"]}. Weather data not available.")
+                print_concert_weather(concert, weather_data)
         else:
             print(f"No upcoming concerts found for '{artist_input}'.")
     else:
