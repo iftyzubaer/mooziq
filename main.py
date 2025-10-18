@@ -263,62 +263,69 @@ def write_artists_data_csv(rows):
     except IOError as error:
         print(f"Error writing to CSV file: {error}")
 
-def export_artist_data():
+def get_album_count(artist_id):
+    album_file = os.path.join(ALBUMS_DIR, f"{artist_id}.json")
+    if os.path.exists(album_file):
+        album_data = load_json(album_file)
+        return len(album_data.get("items", [])) if album_data else 0
+
+def get_top_tracks(artist_id):
+    top_file = os.path.join(TOP_TRACKS_DIR, f"{artist_id}.json")
+    if not os.path.exists(top_file):
+        return "", ""
+    
+    top_data = load_json(top_file)
+    if not top_data:
+        return "", ""
+    
+    tracks = top_data.get("tracks", [])
+    top1 = tracks[0].get("name", "") if len(tracks) > 0 else ""
+    top2 = tracks[1].get("name", "") if len(tracks) > 1 else ""
+    return top1, top2
+
+def create_artist_row(artist_data, artist_id):
+    artist_name = artist_data.get("name", "")
+    num_albums = get_album_count(artist_id)
+    top1, top2 = get_top_tracks(artist_id)
+    genres = artist_data.get("genres", [])
+    genres_str = ", ".join(genres) if genres else ""
+    
+    return {
+        "artist_id": artist_id,
+        "artist_name": artist_name,
+        "number_of_albums": str(num_albums),
+        "top_track_1": top1,
+        "top_track_2": top2,
+        "genres": genres_str
+    }
+
+def update_or_append_row(rows, artist_id, new_row):
+    for row in rows:
+        if row.get("artist_id", "").strip() == artist_id.strip():
+            row.update(new_row)
+            return True
+    
+    rows.append(new_row)
+    return False
+
+def export_artist_data():   
     artists = read_all_artists()
     print_artists(artists)
     artist_name_input = input(INPUT_ARTIST_NAME_MESSAGE).strip()
-
+    
     artist_file, artist_data = find_artist_by_name(artist_name_input)
     if artist_file:
         artist_name = artist_data.get("name", artist_name_input)
         artist_id = artist_data.get("id")
-
-        album_file = os.path.join(ALBUMS_DIR, f"{artist_id}.json")
-        num_albums = 0
-        if os.path.exists(album_file):
-            album_data = load_json(album_file)
-            if album_data:
-                num_albums = len(album_data.get("items", []))
-
-        top_file = os.path.join(TOP_TRACKS_DIR, f"{artist_id}.json")
-        top1 = top2 = ""
-        if os.path.exists(top_file):
-            top_data = load_json(top_file)
-            if top_data:
-                tracks = top_data.get("tracks", [])
-                if len(tracks) > 0:
-                    top1 = tracks[0].get("name", "")
-                if len(tracks) > 1:
-                    top2 = tracks[1].get("name", "")
-
-        genres = artist_data.get("genres", [])
-        genres_str = ", ".join(genres) if genres else ""
-
+        
+        new_row = create_artist_row(artist_data, artist_id)
         rows = read_artists_data_csv()
-        found = False
-        for row in rows:
-            if row.get("artist_id", "").strip() == artist_id.strip():
-                row["artist_name"] = artist_name
-                row["number_of_albums"] = str(num_albums)
-                row["top_track_1"] = top1
-                row["top_track_2"] = top2
-                row["genres"] = genres_str
-                found = True
-
-        if not found:
-            rows.append({
-                "artist_id": artist_id,
-                "artist_name": artist_name,
-                "number_of_albums": str(num_albums),
-                "top_track_1": top1,
-                "top_track_2": top2,
-                "genres": genres_str
-            })
-
+        was_updated = update_or_append_row(rows, artist_id, new_row)
+        
         write_artists_data_csv(rows)
-
+        
         print(f"Exporting \"{artist_name}\" data to CSV file...")
-        if found:
+        if was_updated:
             print("Data successfully updated.")
         else:
             print("Data successfully appended.")
