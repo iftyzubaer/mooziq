@@ -732,10 +732,19 @@ def load_or_create_inverted_index():
         os.makedirs(os.path.dirname(INVERTED_INDEX_FILE), exist_ok=True)
         with open(INVERTED_INDEX_FILE, "w", encoding="utf-8") as file:
             json.dump(inverted_index, file, indent=2)
-    except IOError as e:
-        print(f"Warning: Could not save inverted index: {e}")
+    except IOError as error:
+        print(f"Warning: Could not save inverted index: {error}")
     
     return inverted_index
+
+def calculate_song_scores(query_words, inverted_index):
+    song_scores = {}
+    
+    for word in query_words:
+        if word in inverted_index:
+            for song in inverted_index[word]:
+                song_scores[song] = song_scores.get(song, 0) + 1
+    return song_scores
 
 def search_by_lyrics():
     query = input("Please type the lyrics you'd like to search for: ").strip()
@@ -745,18 +754,10 @@ def search_by_lyrics():
         
         if query_words:
             inverted_index = load_or_create_inverted_index()
-            
-            song_scores = {}
-            
-            for word in query_words:
-                if word in inverted_index:
-                    for song in inverted_index[word]:
-                        if song not in song_scores:
-                            song_scores[song] = 0
-                        song_scores[song] += 1
+            song_scores = calculate_song_scores(query_words, inverted_index)
             
             if song_scores:
-                sorted_songs = sorted(song_scores.items(), key=lambda x: x[1], reverse=True)
+                sorted_songs = sorted(song_scores.items(), reverse=True)
                 
                 print(f"Listing matches for '{query}'...")
                 for song, score in sorted_songs:
