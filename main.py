@@ -17,6 +17,10 @@ ALBUMS_DIR = os.path.join(DATASET, "albums")
 TOP_TRACKS_DIR = os.path.join(DATASET, "top_tracks")
 LYRICS_DIR = os.path.join(DATASET, "lyrics")
 SONGS_DIR = os.path.join(DATASET, "songs")
+JSON_EXTENTION = ".json"
+NO_ARTIST_MESSAGE = "No artists found in the database."
+INPUT_ARTIST_NAME_MESSAGE = "Please input the name of one of the following artists: "
+INVALID_CHOICE_MESSAGE = "Invalid choice."
 
 def load_json(file_path):
     try:
@@ -90,10 +94,10 @@ def read_all_artists():
     files.sort()
     artists = []
     for file in files:
-        if file.endswith(".json"):
+        if file.endswith(JSON_EXTENTION):
             artists_data = load_json(os.path.join(ARTISTS_DIR, file))
             if artists_data:
-                artists.append(artists_data.get("name", "Unknown Artist"))
+                artists.append(artists_data.get("name", ""))
     return artists
 
 def get_all_artists():
@@ -103,7 +107,7 @@ def get_all_artists():
         for name in artists:
             print(f"- {name}")
     else:
-        print("No artists found in the database.")
+        print(NO_ARTIST_MESSAGE)
 
 # !------- Task 2: Get All Albums By An Artist by Ifty -------!
 def find_artist_by_name(name):
@@ -116,7 +120,7 @@ def find_artist_by_name(name):
     result = (None, None)
 
     for file in files:
-        if file.endswith(".json"):
+        if file.endswith(JSON_EXTENTION):
             artist_data = load_json(os.path.join(ARTISTS_DIR, file))
             if artist_data and artist_data.get("name", "").lower() == name.lower():
                 result = (file, artist_data)
@@ -164,9 +168,9 @@ def get_albums_by_artist():
         for name in artists:
             print(f"- {name}")
     else:
-        print("No artists found in the database.")
+        print(NO_ARTIST_MESSAGE)
 
-    artist_name = input("Please input the name of one of the following artists: ").strip()
+    artist_name = input(INPUT_ARTIST_NAME_MESSAGE).strip()
     artist_file, artist_data = find_artist_by_name(artist_name)
     
     if artist_file:
@@ -200,9 +204,9 @@ def get_top_tracks_by_artist():
         for name in artists:
             print(f"- {name}")
     else:
-        print("No artists found in the database.")
+        print(NO_ARTIST_MESSAGE)
 
-    artist_name = input("Please input the name of one of the following artists: ").strip()
+    artist_name = input(INPUT_ARTIST_NAME_MESSAGE).strip()
     artist_file, artist_data = find_artist_by_name(artist_name)
     
     if artist_file:
@@ -266,7 +270,7 @@ def export_artist_data():
     if artists:
         for name in artists:
             print(f"- {name}")
-        artist_name_input = input("Please input the name of one of the following artists: ").strip()
+        artist_name_input = input(INPUT_ARTIST_NAME_MESSAGE).strip()
 
         artist_file, artist_data = find_artist_by_name(artist_name_input)
         if artist_file:
@@ -325,7 +329,7 @@ def export_artist_data():
         else:
             print(f"Artist '{artist_name_input}' not found.")
     else:
-        print("No artists found in the database.")
+        print(NO_ARTIST_MESSAGE)
 
 # !------- Task 5: Get Released Albums By Year by Salah -------!
 def read_all_artists():
@@ -333,9 +337,9 @@ def read_all_artists():
     files.sort()
     artists = []
     for file in files:
-        if file.endswith(".json"):
+        if file.endswith(JSON_EXTENTION):
             artist_data = load_json(os.path.join(ARTISTS_DIR, file))
-            artist_name = artist_data.get("name", "Unknown Artist")
+            artist_name = artist_data.get("name", "")
             artists.append(artist_name)
     return artists
 
@@ -347,7 +351,7 @@ def get_released_albums_by_year():
         main_artists = read_all_artists()
 
         for file in os.listdir(ALBUMS_DIR):
-            if file.endswith(".json"):
+            if file.endswith(JSON_EXTENTION):
                 album_path = os.path.join(ALBUMS_DIR, file)
                 album_data = load_json(album_path)
                 items = album_data.get("items", [])
@@ -356,11 +360,11 @@ def get_released_albums_by_year():
                     release_date = album.get("release_date", "")
                     if release_date and release_date[:4] == year_input:
                         album_name = album.get("name", "").strip()
-                        artist = "Unknown Artist"
+                        artist = ""
 
                         artists = album.get("artists", [])
-                        for a in artists:
-                            name = a.get("name", "Unknown Artist")
+                        for artist in artists:
+                            name = artist.get("name", "")
                             if name in main_artists:
                                 artist = name
                                 break
@@ -504,9 +508,9 @@ def moosify_lyrics():
                 else:
                     print(f"{title} has no lyrics available.")
             else:
-                print("Invalid choice.")
+                print(INVALID_CHOICE_MESSAGE)
         else:
-            print("Invalid choice.")
+            print(INVALID_CHOICE_MESSAGE)
     else:
         print("No songs available.")
 
@@ -561,9 +565,9 @@ def calculate_longest_unique_sequence():
                 else:
                     print("No lyrics found for this song.")
             else:
-                print("Invalid choice.")
+                print(INVALID_CHOICE_MESSAGE)
         else:
-            print("Invalid choice.")
+            print(INVALID_CHOICE_MESSAGE)
     else:
         print("No songs available.")
 
@@ -656,7 +660,7 @@ def predict_weather_for_concerts():
         for artist in artist_list:
             print(f"- {artist}")
 
-        artist_input = input("Please input the name of one of the following artists: ").strip()
+        artist_input = input(INPUT_ARTIST_NAME_MESSAGE).strip()
 
         matching_concerts = []
         
@@ -703,7 +707,7 @@ def build_inverted_index():
         return inverted_index
     
     for file in files:
-        if file.endswith(".json"):
+        if file.endswith(JSON_EXTENTION):
             song_path = os.path.join(SONGS_DIR, file)
             song_data = load_json(song_path)
             
