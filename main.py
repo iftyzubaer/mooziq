@@ -691,6 +691,19 @@ def predict_weather_for_concerts():
         print("No upcoming concerts found.")
 
 # !------- Task 9: Search Song By Lyrics by Ifty -------!
+def add_song_to_index(song_data, inverted_index):
+    title = song_data.get("title", "")
+    lyrics = song_data.get("lyrics", "")
+    
+    if lyrics and title:
+        words = process_text_for_analysis(lyrics)
+        
+        for word in words:
+            if word not in inverted_index:
+                inverted_index[word] = []
+            if title not in inverted_index[word]:
+                inverted_index[word].append(title)
+
 def build_inverted_index():
     inverted_index = {}
     
@@ -704,19 +717,8 @@ def build_inverted_index():
         if file.endswith(JSON_EXTENTION):
             song_path = os.path.join(SONGS_DIR, file)
             song_data = load_json(song_path)
-            
             if song_data:
-                title = song_data.get("title", "")
-                lyrics = song_data.get("lyrics", "")
-                
-                if lyrics and title:
-                    words = process_text_for_analysis(lyrics)
-                    
-                    for word in words:
-                        if word not in inverted_index:
-                            inverted_index[word] = []
-                        if title not in inverted_index[word]:
-                            inverted_index[word].append(title)
+                add_song_to_index(song_data, inverted_index)
     
     return inverted_index
 
