@@ -86,12 +86,11 @@ def main():
 # !------- Task 1: Get All Artists by Ifty -------!
 def read_all_artists():
     try:
-        files = os.listdir(ARTISTS_DIR)
+        files = sorted(os.listdir(ARTISTS_DIR))
     except FileNotFoundError:
         print(f"Error: Artists directory not found - {ARTISTS_DIR}")
         return []
     
-    files.sort()
     artists = []
     for file in files:
         if file.endswith(JSON_EXTENTION):
@@ -359,10 +358,10 @@ def collect_albums_for_years(year_input, main_artists):
     return matching_albums
 
 def sort_albums_by_name(matching_albums):
-    nums = len(matching_albums)
-    for index in range(nums):
+    length = len(matching_albums)
+    for index in range(length):
         min_index = index
-        for count in range(index + 1, nums):
+        for count in range(index + 1, length):
             if matching_albums[count][0] < matching_albums[min_index][0]:
                 min_index = count
         if min_index != index:
@@ -387,14 +386,18 @@ def get_released_albums_by_year():
         print("Invalid year. Please enter a numeric value.")
 
 # !------- Task 6: Analyze Song Lyrics by Ifty -------!
+def read_all_songs():
+    try:
+        files = sorted(os.listdir(SONGS_DIR))
+        return files
+    except FileNotFoundError:
+        print(f"Error: Songs directory not found - {SONGS_DIR}")
+        return []
+    
 def get_available_songs():
     songs = []
 
-    try:
-        files = sorted(os.listdir(SONGS_DIR))
-    except FileNotFoundError:
-        print(f"Error: Songs directory not found - {SONGS_DIR}")
-        return songs
+    files = read_all_songs()
 
     for file in files:
         path = os.path.join(SONGS_DIR, file)
@@ -709,11 +712,7 @@ def add_song_to_index(song_data, inverted_index):
 def build_inverted_index():
     inverted_index = {}
     
-    try:
-        files = os.listdir(SONGS_DIR)
-    except FileNotFoundError:
-        print(f"Error: Songs directory not found - {SONGS_DIR}")
-        return inverted_index
+    files = read_all_songs()
     
     for file in files:
         if file.endswith(JSON_EXTENTION):
