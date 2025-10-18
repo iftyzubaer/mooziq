@@ -337,43 +337,50 @@ def read_all_artists():
             artists.append(artist_name)
     return artists
 
+def get_main_artist(artists, main_artists):
+    for artist in artists:
+        name = artist.get("name", "")
+        if name in main_artists:
+            return name
+    return ""
+
+def collect_albums_for_years(year_input, main_artists):
+    matching_albums = []
+    
+    for file in os.listdir(ALBUMS_DIR):
+        if file.endswith(JSON_EXTENTION):
+            album_path = os.path.join(ALBUMS_DIR, file)
+            album_data = load_json(album_path)
+            items = album_data.get("items", [])
+
+            for album in items:
+                release_date = album.get("release_date", "")
+                if release_date and release_date.startswith(year_input):
+                    album_name = album.get("name", "").strip()
+                    artist = get_main_artist(album.get("artists", []), main_artists)
+                    matching_albums.append((album_name, artist))
+
+    return matching_albums
+
+def sort_albums_by_name(matching_albums):
+    nums = len(matching_albums)
+    for index in range(nums):
+        min_index = index
+        for count in range(index + 1, nums):
+            if matching_albums[count][0] < matching_albums[min_index][0]:
+                min_index = count
+        if min_index != index:
+            matching_albums[index], matching_albums[min_index] = matching_albums[min_index], matching_albums[index]
+
 def get_released_albums_by_year():
     year_input = input("Please enter a year: ").strip()
-    matching_albums = []
 
     if year_input.isdigit():
         main_artists = read_all_artists()
-
-        for file in os.listdir(ALBUMS_DIR):
-            if file.endswith(JSON_EXTENTION):
-                album_path = os.path.join(ALBUMS_DIR, file)
-                album_data = load_json(album_path)
-                items = album_data.get("items", [])
-
-                for album in items:
-                    release_date = album.get("release_date", "")
-                    if release_date and release_date.startswith(year_input):
-                        album_name = album.get("name", "").strip()
-                        artist = ""
-
-                        artists = album.get("artists", [])
-                        for artist in artists:
-                            name = artist.get("name", "")
-                            if name in main_artists:
-                                artist = name
-                                break
-
-                        matching_albums.append((album_name, artist))
+        matching_albums = collect_albums_for_years(year_input, main_artists)
 
         if matching_albums:
-            nums = len(matching_albums)
-            for index in range(nums):
-                min_index = index
-                for count in range(index + 1, nums):
-                    if matching_albums[count][0] < matching_albums[min_index][0]:
-                        min_index = count
-                if min_index != index:
-                    matching_albums[index], matching_albums[min_index] = matching_albums[min_index], matching_albums[index]
+            sort_albums_by_name(matching_albums)
 
             print(f"Albums released in the year {year_input}:")
             for name, artist in matching_albums:
