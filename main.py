@@ -358,7 +358,7 @@ def get_released_albums_by_year():
 
                 for album in items:
                     release_date = album.get("release_date", "")
-                    if release_date and release_date[:4] == year_input:
+                    if release_date and release_date.startswith(year_input):
                         album_name = album.get("name", "").strip()
                         artist = ""
 
