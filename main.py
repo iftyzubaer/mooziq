@@ -95,9 +95,9 @@ def read_all_artists():
     artists = []
     for file in files:
         if file.endswith(JSON_EXTENTION):
-            artists_data = load_json(os.path.join(ARTISTS_DIR, file))
-            if artists_data:
-                artists.append(artists_data.get("name", ""))
+            artist_data = load_json(os.path.join(ARTISTS_DIR, file))
+            if artist_data:
+                artists.append(artist_data.get("name", ""))
     return artists
 
 def print_artists(artists):
@@ -333,17 +333,6 @@ def export_artist_data():
         print(f"Artist '{artist_name_input}' not found.")
 
 # !------- Task 5: Get Released Albums By Year by Salah -------!
-def read_all_artists():
-    files = os.listdir(ARTISTS_DIR)
-    files.sort()
-    artists = []
-    for file in files:
-        if file.endswith(JSON_EXTENTION):
-            artist_data = load_json(os.path.join(ARTISTS_DIR, file))
-            artist_name = artist_data.get("name", "")
-            artists.append(artist_name)
-    return artists
-
 def get_main_artist(artists, main_artists):
     for artist in artists:
         name = artist.get("name", "")
@@ -473,13 +462,6 @@ def print_moose():
       \____/
 """)
     print(moose)
-
-def print_song_list(songs):
-    print("Available songs:")
-    for index, song in enumerate(songs, 1):
-        artist = song.get("artist", "Unknown")
-        title = song.get("title")
-        print(f"{index}. {title} by {artist}")
 
 def get_valid_song_choice(songs):
     choice = input("Please select one of the following songs (number): ").strip()
