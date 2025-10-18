@@ -334,6 +334,17 @@ def export_artist_data():
 # !------- Task 5: Get Released Albums By Year by Salah -------!
 import os
 
+def read_all_artists():
+    files = os.listdir(ARTISTS_DIR)
+    files.sort()
+    artists = []
+    for file in files:
+        if file.endswith(".json"):
+            artist_data = load_json(os.path.join(ARTISTS_DIR, file))
+            artist_name = artist_data.get("name", "Unknown Artist")
+            artists.append(artist_name)
+    return artists
+
 def get_released_albums_by_year():
     year_input = input("Please enter a year: ").strip()
     matching_albums = []
@@ -342,7 +353,7 @@ def get_released_albums_by_year():
         print("Invalid year. Please enter a numeric value.")
         return
 
-    main_artists = read_all_artists()  
+    main_artists = read_all_artists()
 
     for file in os.listdir(ALBUMS_DIR):
         if file.endswith(".json"):
@@ -353,27 +364,30 @@ def get_released_albums_by_year():
             for album in items:
                 release_date = album.get("release_date", "")
                 if release_date and release_date[:4] == year_input:
-                    name = album.get("name", "").strip()
-
-                    artists = album.get("artists", [])
+                    album_name = album.get("name", "").strip()
                     artist = "Unknown Artist"
 
+                    artists = album.get("artists", [])
                     for a in artists:
-                        artist_name = a.get("name", "").strip()
-                        if artist_name in main_artists:
-                            artist = artist_name
+                        name = a.get("name", "Unknown Artist")
+                        if name in main_artists:
+                            artist = name
                             break
 
-                    if artist == "Unknown Artist" and artists:
-                        artist = artists[0].get("name", "Unknown Artist").strip()
-
-                    matching_albums.append((name, artist))
+                    matching_albums.append((album_name, artist))
 
     if not matching_albums:
         print(f"No albums were released in the year {year_input}.")
         return
-
-    matching_albums.sort(key=lambda x: x[0])
+    
+    n = len(matching_albums)
+    for i in range(n):
+        min_index = i
+        for j in range(i + 1, n):
+            if matching_albums[j][0] < matching_albums[min_index][0]:
+                min_index = j
+        if min_index != i:
+            matching_albums[i], matching_albums[min_index] = matching_albums[min_index], matching_albums[i]
 
     print(f"albums released in the year {year_input}:")
     for name, artist in matching_albums:
